@@ -9,9 +9,7 @@ pipeline {
         stage('Set up Virtual Environment') {
             steps {
                 script {
-                    // Check if the virtual environment already exists
                     if (!fileExists("${VENV_DIR}/bin/activate")) {
-                        // Create the virtual environment and install dependencies if not present
                         sh '''
                             python3 -m venv venv
                             . venv/bin/activate
@@ -25,13 +23,12 @@ pipeline {
             }
         }
 
-        stage('Run Tests and Generate HTML Report') {
+        stage('Run Tests and Generate Cucumber Report') {
             steps {
                 script {
-                    // Activate the virtual environment and run tests
                     sh '''
                         . venv/bin/activate
-                        pytest --html=report.html --self-contained-html
+                        pytest --html=report.html --self-contained-html --cucumber-json=report.json
                     '''
                 }
             }
@@ -42,7 +39,7 @@ pipeline {
                 publishHTML([
                     reportDir: '.',
                     reportFiles: 'report.html',
-                    reportName: 'Pytest HTML Report',
+                    reportName: 'Cucumber HTML Report',
                     keepAll: true,
                     alwaysLinkToLastBuild: true,
                     allowMissing: false
