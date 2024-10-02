@@ -2,19 +2,6 @@ pipeline {
     agent any
 
     stages {
-        stage('Install Dependencies') {
-            steps {
-                script {
-                    sh '''
-                        python3 -m venv venv
-                        . venv/bin/activate
-                        pip install --upgrade pip
-                        pip install -r requirements.txt
-                    '''
-                }
-            }
-        }
-
         stage('Run Tests and Generate Reports') {
             steps {
                 script {
@@ -33,7 +20,8 @@ pipeline {
                     reportFiles: 'report.html',
                     reportName: 'Pytest HTML Report',
                     keepAll: true,
-                    alwaysLinkToLastBuild: true
+                    alwaysLinkToLastBuild: true,
+                    allowMissing: false  // Added required parameter
                 ])
             }
         }
