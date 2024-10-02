@@ -23,12 +23,12 @@ pipeline {
             }
         }
 
-        stage('Run Tests and Generate Cucumber Report') {
+        stage('Run Tests and Generate Report') {
             steps {
                 script {
                     sh '''
                         . venv/bin/activate
-                        pytest --html=report.html --self-contained-html --cucumber-json=report.json
+                        pytest --html=report.html --self-contained-html
                     '''
                 }
             }
@@ -39,7 +39,7 @@ pipeline {
                 publishHTML([
                     reportDir: '.',
                     reportFiles: 'report.html',
-                    reportName: 'Cucumber HTML Report',
+                    reportName: 'Pytest HTML Report',
                     keepAll: true,
                     alwaysLinkToLastBuild: true,
                     allowMissing: false
