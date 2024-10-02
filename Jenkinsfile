@@ -1,28 +1,37 @@
 pipeline {
     agent any
 
+    environment {
+        VENV_DIR = "${WORKSPACE}/venv"
+    }
+
     stages {
-        stage('Install Dependencies') {
+        stage('Set up Virtual Environment') {
             steps {
                 script {
-                    // Create the virtual environment
-                    sh '''
-                        python3 -m venv venv
-                        . venv/bin/activate
-                        pip install --upgrade pip
-                        pip install -r requirements.txt
-                    '''
+                    // Check if the virtual environment already exists
+                    if (!fileExists("${VENV_DIR}/bin/activate")) {
+                        // Create the virtual environment and install dependencies if not present
+                        sh '''
+                            python3 -m venv venv
+                            . venv/bin/activate
+                            pip install --upgrade pip
+                            pip install -r requirements.txt
+                        '''
+                    } else {
+                        echo 'Virtual environment already exists, skipping installation.'
+                    }
                 }
             }
         }
 
-        stage('Run Tests and Generate Reports') {
+        stage('Run Tests and Generate HTML Report') {
             steps {
                 script {
-                    // Ensure the virtual environment is activated before running tests
+                    // Activate the virtual environment and run tests
                     sh '''
                         . venv/bin/activate
-                        pytest --html=report.html --self-contained-html --alluredir=allure-results
+                        pytest --html=report.html --self-contained-html
                     '''
                 }
             }
@@ -37,16 +46,6 @@ pipeline {
                     keepAll: true,
                     alwaysLinkToLastBuild: true,
                     allowMissing: false
-                ])
-            }
-        }
-
-        stage('Publish Allure Results') {
-            steps {
-                allure([
-                    includeProperties: false,
-                    jdk: '',
-                    results: [[path: 'allure-results']]
                 ])
             }
         }
